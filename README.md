@@ -32,15 +32,6 @@ with p.guard(user_id, action="llm_call") as ctx:
 final = ctx.rehydrate(response)      # restore PII in response
 ```
 
-### Monetization model
-
-| Tier       | Price        | Includes                                        |
-|------------|--------------|-------------------------------------------------|
-| Free       | $0           | SDKs are fully open source                      |
-| Solo       | $19/mo       | Dashboard: logs, policy editor, score history   |
-| Team       | $49/user/mo  | Roles, audit exports, CI/CD hooks, Slack alerts |
-| Enterprise | Custom       | Self-hosted, SSO, SLA, BAA for HIPAA            |
-
 ---
 
 ## Install
