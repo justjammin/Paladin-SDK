@@ -1,4 +1,4 @@
-# Paladin SDK — Complete Monorepo
+# Paladin SDK
 
 > **Zero-AI. Zero network calls. Zero dependencies.**
 > Five composable SDKs that form a complete AI security pipeline.
