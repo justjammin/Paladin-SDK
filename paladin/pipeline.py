@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from functools import wraps
 from typing import Optional, Callable
 
 from bulwark.scanner import BulwarkWall, InjectionRiskError
+from .output_guard import guard_output
 from vault.scanner import VaultGuard, SecretsLeakError
 from sentinel.scrubber import Sentinel
 from sentinel.vault import Vault
@@ -101,3 +103,37 @@ class Paladin:
 
         with trace_ctx:
             yield ctx
+
+    def guard_return(
+        self,
+        *,
+        raise_on_injection: bool = False,
+        attach_notice: bool = True,
+    ) -> Callable:
+        """
+        Decorator that guards a tool's return value.
+
+        Mirrors covenant's ``@gate.guard``, but for output: scans the value the
+        wrapped tool returns, redacts secrets and PII, and attaches a guardrail
+        notice. Tool returns are an indirect prompt-injection vector — set
+        ``raise_on_injection=True`` to reject returns whose content trips the
+        injection threshold.
+
+        Usage:
+            @p.guard_return()
+            def web_fetch(url: str) -> str:
+                return http_get(url)
+        """
+        def decorator(fn: Callable) -> Callable:
+            @wraps(fn)
+            def wrapper(*args, **kwargs):
+                result = fn(*args, **kwargs)
+                return guard_output(
+                    result,
+                    sentinel=self._sentinel,
+                    threshold=self._wall.threshold,
+                    raise_on_injection=raise_on_injection,
+                    attach_notice=attach_notice,
+                )
+            return wrapper
+        return decorator

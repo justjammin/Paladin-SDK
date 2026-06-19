@@ -3,6 +3,7 @@ LangChain agent — covenant gates every tool, sentinel scrubs input.
 """
 from covenant import Gate, Policy
 from sentinel import scrub, rehydrate
+from paladin import Paladin
 
 gate = Gate(
     policies=[
@@ -14,6 +15,7 @@ gate = Gate(
     approval_fn=lambda action, kwargs: True,   # Replace with real UI
     audit_log_fn=lambda *a: None,
 )
+p = Paladin()
 
 
 @gate.guard("send_email")
@@ -22,8 +24,10 @@ def send_email(to: str, subject: str, body: str) -> str:
 
 
 @gate.guard("call_api")
+@p.guard_return()
 def call_external_api(url: str, payload: dict) -> dict:
-    return {"status": "ok"}
+    # Return value is untrusted external data; guard_return scans + sanitizes it.
+    return {"status": "ok", "body": "External API response body"}
 
 
 def run_agent(user_input: str) -> str:
